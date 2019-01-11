@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<body>
+	<title>Bolt Properties</title>
+	<a href="/Design/Steel Design/Australian Steel Sections/WEBSITE/home.html"><img src="GTLOGO.png" align="right" width=250px></a>
+	<div id="TableDiv">
+		<body style="font-family:verdana;">
+			<h3>Bolt Properties</h3><br></br>
+			<div>
+			<h4 align="center">4.6/S</h4>
+				<table id="myTable" align="center">
+					<colgroup>
+						<col span="1" width="100">
+						<col span="1" width="65">
+						<col span="2" width="62">
+					</colgroup>
+
+					<!-- ENTER TABLE DATA BELOW -->
+					<tr>
+						<th rowspan="4">Designation</th>
+						<th rowspan="2">Axial Tension</th>
+						<th colspan="2">Shear Values</th>
+					</tr>
+					<tr>
+						<th>Threads inc</th>
+						<th>Theads exc</th>
+					</tr>
+					<tr>
+						<th>&Phi;N<sub>tf</sub></th>
+						<th>&Phi;V<sub>fn</sub></th>
+						<th>&Phi;V<sub>fn</sub></th>
+					</tr>
+					<tr>
+						<th>kN</th>
+						<th>kN</th>
+						<th>kN</th>
+					</tr>
+					<tr>
+						<td>M12</td>
+						<td>27</td>
+						<td>15.1</td>
+						<td>22.4</td>
+					</tr>
+					<tr>
+						<td>M16</td>
+						<td>50.2</td>
+						<td>28.6</td>
+						<td>39.9</td>
+					</tr>
+					<tr>
+						<td>M20</td>
+						<td>78.4</td>
+						<td>44.6</td>
+						<td>62.3</td>
+					</tr>
+					<tr>
+						<td>M24</td>
+						<td>113</td>
+						<td>64.3</td>
+						<td>89.7</td>
+					</tr>
+					<tr>
+						<td>M30</td>
+						<td>180</td>
+						<td>103</td>
+						<td>140</td>
+					</tr>
+					<tr>
+						<td>M36</td>
+						<td>261</td>
+						<td>151</td>
+						<td>202</td>
+					</tr>
+
+					<!-- ENTER TABLE DATA ABOVE -->
+				</table><br></br>
+
+				<h4 align="center">8.8/S, 8.8/TB, 8.8/TF</h4>
+				<table id="myTable" align="center">
+						<colgroup>
+							<col span="1" width="100">
+							<col span="1" width="65">
+							<col span="2" width="62">
+						</colgroup>
+
+						<!-- ENTER TABLE DATA BELOW -->
+						<tr>
+							<th rowspan="4">Designation</th>
+							<th rowspan="2">Axial Tension</th>
+							<th colspan="2">Shear Values</th>
+						</tr>
+						<tr>
+							<th>Threads inc</th>
+							<th>Theads exc</th>
+						</tr>
+						<tr>
+							<th>&Phi;N<sub>tf</sub></th>
+							<th>&Phi;V<sub>fn</sub></th>
+							<th>&Phi;V<sub>fn</sub></th>
+						</tr>
+						<tr>
+							<th>kN</th>
+							<th>kN</th>
+							<th>kN</th>
+						</tr>
+						<tr>
+							<td>M16</td>
+							<td>104</td>
+							<td>59.3</td>
+							<td>82.7</td>
+						</tr>
+						<tr>
+							<td>M20</td>
+							<td>163</td>
+							<td>92.6</td>
+							<td>129</td>
+						</tr>
+						<tr>
+							<td>M24</td>
+							<td>234</td>
+							<td>133</td>
+							<td>186</td>
+						</tr>
+						<tr>
+							<td>M30</td>
+							<td>373</td>
+							<td>214</td>
+							<td>291</td>
+						</tr>
+
+						<!-- ENTER TABLE DATA ABOVE -->
+					</table>
+				</div>
+
+		</body>
+	</div>
+</body>
+</html>
+
+<style>
+	.inputBox {
+		margin: auto;
+	}
+
+	body {background-color: #b0b0b0;}
+
+	table {
+		overflow: hidden;
+		font-family: arial, sans-serif;
+		border-collapse: collapse;
+	}
+
+	#myTable td, th {
+		border: 1px solid #000000;
+	}
+
+	#myTable th{
+		background-color: #dbdbdb;
+		text-align: center;
+	}
+
+	#myTable tr:nth-child(odd) {
+		background-color: #B8B5B5;
+	}
+
+	#myTable tr:nth-child(even) {
+		background-color: #a4a0a0;
+	}
+
+	#myInput {
+	  font-size: 16px; /* Increase font-size */
+	  padding: 5px 5px 5px 5px; /* Add some padding */
+	  border: 1px solid #ddd; /* Add a grey border */
+	  margin-bottom: 12px; /* Add some space below the input */
+	}
+
+	#myTable tr.header, #myTable tr:hover {
+	  /* Add a grey background color to the table header and on hover */
+	  background-color: #53be33;
+	}
+</style>
+
+<script>
+function rowColour() {
+	document.style.backgroundColor = "red";
+}
+
+
+
+function sortTable(n) {
+  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+  table = document.getElementById("myTable");
+  switching = true;
+  //Set the sorting direction to ascending:
+  dir = "asc";
+  /*Make a loop that will continue until
+  no switching has been done:*/
+  while (switching) {
+    //start by saying: no switching is done:
+    switching = false;
+    rows = table.rows;
+    /*Loop through all table rows (except the
+    first, which contains table headers):*/
+    for (i = 1; i < (rows.length - 1); i++) {
+      //start by saying there should be no switching:
+      shouldSwitch = false;
+      /*Get the two elements you want to compare,
+      one from current row and one from the next:*/
+      x = rows[i].getElementsByTagName("TD")[n];
+      y = rows[i + 1].getElementsByTagName("TD")[n];
+      /*check if the two rows should switch place,
+      based on the direction, asc or desc:*/
+      if (dir == "asc") {
+        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+          //if so, mark as a switch and break the loop:
+          shouldSwitch= true;
+          break;
+        }
+      } else if (dir == "desc") {
+        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+          //if so, mark as a switch and break the loop:
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+    if (shouldSwitch) {
+      /*If a switch has been marked, make the switch
+      and mark that a switch has been done:*/
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      //Each time a switch is done, increase this count by 1:
+      switchcount ++;
+    } else {
+      /*If no switching has been done AND the direction is "asc",
+      set the direction to "desc" and run the while loop again.*/
+      if (switchcount == 0 && dir == "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
+}
+
+function myFunction() {
+		// Declare variables
+		var input, filter, table, tr, td, i, txtValue;
+		input = document.getElementById("myInput");
+		filter = input.value.toUpperCase();
+		table = document.getElementById("myTable");
+		tr = table.getElementsByTagName("tr");
+
+		// Loop through all table rows, and hide those who don't match the search query
+		for (i = 0; i < tr.length; i++) {
+		  td = tr[i].getElementsByTagName("td")[0];
+		  if (td) {
+		    txtValue = td.textContent || td.innerText;
+		    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+		      tr[i].style.display = "";
+		    } else {
+		      tr[i].style.display = "none";
+		    }
+		  }
+		}
+}
+</script>
