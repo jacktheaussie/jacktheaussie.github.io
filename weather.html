@@ -30,6 +30,10 @@
   iframe { border-color: var(--border) !important; background: #0b0f14; }
   .section-sep { height: 1px; background: var(--border); margin: 4px 0; }
 
+  .rainfall-table { width: 100%; margin-top: 6px; font-size: 11px; }
+  .rainfall-table th, .rainfall-table td { padding: 4px; }
+  .rainfall-table thead th { font-weight: 600; }
+
   .layout { display: flex; gap: 4px; align-items: flex-start; }
   .col-left { flex: 1 1 150px; min-width: 0; }
   .col-right { flex: 1 1 150px; min-width: 0; }
@@ -45,6 +49,53 @@
 <div class="card">
     <div class="layout">
     <div class="col-left">
+
+<table id="rainfall-table" class="rainfall-table">
+    <thead>
+      <tr>
+        <th rowspan="2">Site</th>
+        <th colspan="8">Daily rainfall (mm)</th>
+        <th rowspan="2">Total</th>
+      </tr>
+      <tr>
+        <th class="rain-date"></th>
+        <th class="rain-date"></th>
+        <th class="rain-date"></th>
+        <th class="rain-date"></th>
+        <th class="rain-date"></th>
+        <th class="rain-date"></th>
+        <th class="rain-date"></th>
+        <th>Since 9am</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-site="annandale">
+        <th>Anndandale</th>
+        <td class="rain-cell">0</td>
+        <td class="rain-cell">0</td>
+        <td class="rain-cell">0</td>
+        <td class="rain-cell">0</td>
+        <td class="rain-cell">0</td>
+        <td class="rain-cell">0</td>
+        <td class="rain-cell">0</td>
+        <td class="rain-cell">0</td>
+        <td class="row-total"></td>
+      </tr>
+      <tr data-site="thelakes">
+        <th>The Lakes</th>
+        <td class="rain-cell">0</td>
+        <td class="rain-cell">0</td>
+        <td class="rain-cell">0</td>
+        <td class="rain-cell">0</td>
+        <td class="rain-cell">0</td>
+        <td class="rain-cell">0</td>
+        <td class="rain-cell">0</td>
+        <td class="rain-cell">0</td>
+        <td class="row-total"></td>
+      </tr>
+    </tbody>
+  </table>
+  <div id="rainfall-updated" class="muted"></div>
 <table>
     <tr><th>Latest timestamp</th><td id="ts"></td></tr>
     <tr><th>Sensor reading / Headwater level (m)</th><td id="level"></td></tr>
@@ -119,6 +170,100 @@ function formatTimestampAEST(ts){
     hour12: false,
     timeZoneName: "short"
   });
+}
+
+
+function normalizeSiteKey(name){
+  return String(name).toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function updateRainfallTotals(){
+  const rows = document.querySelectorAll("#rainfall-table tbody tr");
+  rows.forEach((row) => {
+    let sum = 0;
+    const cells = row.querySelectorAll(".rain-cell");
+    cells.forEach((td) => {
+      const n = Number(String(td.textContent).replace(/[^0-9.+-]/g, ""));
+      if (Number.isFinite(n)) sum += n;
+    });
+    const totalCell = row.querySelector(".row-total");
+    if (totalCell) totalCell.textContent = String(Math.round(sum * 10) / 10);
+  });
+}
+
+function fillRainfallTableFromHtml(htmlText){
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlText, "text/html");
+  const target = doc.querySelector("table.rhb") || doc.querySelector("table.tabledata");
+  if (!target) return;
+
+  const rows = Array.from(target.querySelectorAll("tr"));
+  const sinceRow = rows.find(r => (r.textContent || "").toLowerCase().includes("since 9am"));
+  let sinceLabel = "Since 9am";
+  if (sinceRow){
+    const cells = Array.from(sinceRow.querySelectorAll("th, td"));
+    const last = cells[cells.length - 1];
+    if (last) sinceLabel = (last.textContent || "").replace(/\s+/g, " ").trim();
+  }
+
+  const dayRow = rows.find((r) => {
+    const cells = Array.from(r.querySelectorAll("th, td"));
+    if (cells.length < 7) return false;
+    const numeric = cells.filter(c => /^\d{1,2}$/.test((c.textContent || "").trim()));
+    return numeric.length >= 7;
+  });
+  if (dayRow){
+    const dayHeaders = Array.from(dayRow.querySelectorAll("th, td"))
+      .map(c => (c.textContent || "").trim())
+      .filter(t => /^\d{1,2}$/.test(t))
+      .slice(0, 7);
+    const headers = dayHeaders.length === 7 ? [...dayHeaders, sinceLabel] : [];
+    const ths = document.querySelectorAll("#rainfall-table thead tr:last-child th");
+    for (let i = 0; i < ths.length; i++){
+      const val = headers[i];
+      if (val) ths[i].textContent = val;
+    }
+  }
+
+  const dataRows = rows.filter(r => r.querySelectorAll("td").length >= 2);
+  const siteRowMap = new Map();
+  document.querySelectorAll("#rainfall-table tbody tr").forEach(r => {
+    const key = normalizeSiteKey(r.getAttribute("data-site") || "");
+    siteRowMap.set(key, r);
+  });
+
+  dataRows.forEach((r) => {
+    const cells = Array.from(r.querySelectorAll("th, td"));
+    if (!cells.length) return;
+    const siteName = normalizeSiteKey(cells[0].textContent || "");
+    const row = siteRowMap.get(siteName);
+    if (!row) return;
+    const values = cells.slice(1, 9).map(c => (c.textContent || "").trim());
+    const outCells = row.querySelectorAll(".rain-cell");
+    for (let i = 0; i < outCells.length && i < values.length; i++){
+      outCells[i].textContent = values[i] || "0";
+    }
+  });
+
+  updateRainfallTotals();
+
+  const issued = Array.from(doc.querySelectorAll("p"))
+    .map(p => (p.textContent || "").replace(/\s+/g, " ").trim())
+    .find(t => t.toLowerCase().startsWith("issued at"));
+  const updatedEl = document.getElementById("rainfall-updated");
+  if (updatedEl && issued) updatedEl.textContent = `Last updated: ${issued}`;
+}
+
+async function initRainfallTable(){
+  updateRainfallTotals();
+  try{
+    const resp = await fetch("bom_data/IDQ60364.html", { cache: "no-store" });
+    if (!resp.ok) return;
+    const htmlText = await resp.text();
+    fillRainfallTableFromHtml(htmlText);
+  }catch (e){
+    // Keep static values on failure.
+  }
 }
 
 function dischargeFromLevel(level){
@@ -609,6 +754,7 @@ function drawPlot(points){
   }
 }
 
+initRainfallTable();
 load();
 </script>
 </body>
