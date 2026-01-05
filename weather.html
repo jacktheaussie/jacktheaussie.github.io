@@ -30,7 +30,7 @@
   iframe { border-color: var(--border) !important; background: #0b0f14; }
   .section-sep { height: 1px; background: var(--border); margin: 4px 0; }
 
-  .rainfall-table { width: 100%; margin-top: 6px; font-size: 11px; }
+  .rainfall-table { width: 60%; margin-top: 6px; font-size: 11px; }
   .rainfall-table th, .rainfall-table td { padding: 4px; }
   .rainfall-table thead th { font-weight: 600; }
 
@@ -70,7 +70,7 @@
     </thead>
     <tbody>
       <tr data-site="annandale">
-        <th> Anndandale</th>
+        <th>Anndandale</th>
         <td class="rain-cell">0</td>
         <td class="rain-cell">0</td>
         <td class="rain-cell">0</td>
@@ -82,7 +82,7 @@
         <td class="row-total"></td>
       </tr>
       <tr data-site="thelakes">
-        <th> The Lakes</th>
+        <th>The Lakes</th>
         <td class="rain-cell">0</td>
         <td class="rain-cell">0</td>
         <td class="rain-cell">0</td>
@@ -194,15 +194,7 @@ function updateRainfallTotals(){
 function fillRainfallTableFromHtml(htmlText){
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlText, "text/html");
-  const tables = Array.from(doc.querySelectorAll("table.tabledata, table.rhb"));
-  let target = null;
-  for (const t of tables){
-    const textKey = normalizeSiteKey(t.textContent || "");
-    if (textKey.includes("annandale") || textKey.includes("thelakes")){
-      target = t;
-      break;
-    }
-  }
+  const target = doc.querySelector("table.rhb") || doc.querySelector("table.tabledata");
   if (!target) return;
 
   const rows = Array.from(target.querySelectorAll("tr"));
