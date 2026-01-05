@@ -222,7 +222,16 @@ function updateRainfallTotals(){
 function fillRainfallTableFromHtml(htmlText){
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlText, "text/html");
-  const target = doc.querySelector("table.rhb") || doc.querySelector("table.tabledata");
+  const tables = Array.from(doc.querySelectorAll("table.tabledata, table.rhb"));
+  let target = null;
+  for (const t of tables){
+    const textKey = normalizeSiteKey(t.textContent || "");
+    if (textKey.includes("annandale") || textKey.includes("thelakes")){
+      target = t;
+      break;
+    }
+  }
+  if (!target) target = tables[0] || null;
   if (!target) return;
 
   const issued = Array.from(doc.querySelectorAll("p"))
@@ -253,10 +262,11 @@ function fillRainfallTableFromHtml(htmlText){
     const ths = document.querySelectorAll("#rainfall-table thead tr:last-child th");
     if (issuedDate){
       const dates = [];
-      for (let i = 6; i >= 0; i--){
-        const d = new Date(issuedDate);
-        d.setDate(d.getDate() - i);
-        dates.push(formatDateDMY(d));
+      const base = new Date(issuedDate);
+      for (let i = dayHeaders.length - 1; i >= 0; i--){
+        const d = new Date(base);
+        d.setDate(d.getDate() - (dayHeaders.length - 1 - i));
+        dates.unshift(formatDateDMY(d));
       }
       for (let i = 0; i < ths.length; i++){
         if (i < 7) ths[i].textContent = dates[i];
