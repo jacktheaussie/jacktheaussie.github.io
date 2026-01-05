@@ -574,7 +574,7 @@ function drawPlot(points){
       g.arc(X, YQ, 3, 0, Math.PI*2);
       g.fill();
 
-      const tip = `${fmt(p.t)} | Level ${p.level.toFixed(2)} m | Q ${p.q.toFixed(0)} mA3/s`;
+      const tip = `${fmt(p.t)} | Level ${p.level.toFixed(2)} m | Q ${p.q.toFixed(0)} m3/s`;
       g.font="10px system-ui, sans-serif";
       const tw = g.measureText(tip).width + 10;
       const tx = Math.min(c.width - tw - 6, Math.max(6, X - tw/2));
