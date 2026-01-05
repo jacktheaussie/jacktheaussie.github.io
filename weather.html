@@ -42,26 +42,20 @@
 </head>
 <body>
 <h1>Ross River Dam – Live Dashboard</h1>
-
 <div class="card">
     <div class="layout">
     <div class="col-left">
 <table>
     <tr><th>Latest timestamp</th><td id="ts"></td></tr>
-
     <tr><th>Sensor reading / Headwater level (m)</th><td id="level"></td></tr>
-
     <tr><th>Storage (%)</th><td id="storPct"></td></tr>
     <tr><th>Capacity (ML)</th><td id="capML"></td></tr>
-
     <tr><th>Total discharge (m³/s)</th><td id="q"></td></tr>
     <tr><th>Discharge (L/s)</th><td id="qLs"></td></tr>
     <tr><th>Wheelie bins / s (120 L)</th><td id="bins"></td></tr>
   </table>
-
   <canvas id="plot" width="1040" height="320"></canvas>
   <div class="muted">Sensor/headwater level and estimated discharge vs time</div>
-
   <div id="aplin-status" class="aplin-status">Aplin Weir (id 532029) level vs time</div>
   <canvas id="aplin-plot" width="1040" height="260"></canvas>
   <div class="aplin-status" style="margin-top:6px;">Other weather links</div>
@@ -73,7 +67,6 @@
     <li><a href="https://www.metoc.navy.mil/jtwc/jtwc.html" rel="noopener">US Navy METOC</a></li>
   </ul>
     </div>
-
     <div class="col-right">
 <iframe id="wheelie"
     width="100%" height="750"
@@ -84,15 +77,12 @@
   <div class="muted">Wheelie bin visualisation provided by polner.dev </div>
     </div>
   </div>
-
   <div id="err" class="err"></div>
 </div>
-
 <script src="hwQ.js"></script>
 <script src="capRaw.js"></script>
 
 <script>
-
 /* =======================
    Headwater → Total Q (m³/s)
    (your earlier table)
@@ -104,7 +94,6 @@ function interpolate1D(x, pairs){
   if (!pairs.length) return null;
   if (x <= pairs[0][0]) return pairs[0][1];
   if (x >= pairs[pairs.length-1][0]) return pairs[pairs.length-1][1];
-
   for (let i=0;i<pairs.length-1;i++){
     const [x1,y1] = pairs[i];
     const [x2,y2] = pairs[i+1];
@@ -115,7 +104,6 @@ function interpolate1D(x, pairs){
   }
   return null;
 }
-
 
 function formatTimestampAEST(ts){
   const d = new Date(ts);
