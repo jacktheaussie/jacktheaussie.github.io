@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Ross River Dam Dashboard</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0e1116;
+    --card: #141a22;
+    --text: #e6e8eb;
+    --muted: #a6adb8;
+    --border: #263040;
+    --accent: #6fb1ff;
+  }
+  body { font-family: system-ui, sans-serif; margin: 20px; background: var(--bg); color: var(--text); }
+  .card { border: 1px solid var(--border); border-radius: 4px; padding: 4px; max-width: 99%; width: 99%; background: var(--card); }
+  h1 { margin-top: 0; }
+  table { width: 90%; border-collapse: collapse; margin-top: 4px; }
+  th, td { padding: 4px 4px; border-bottom: 1px solid var(--border); text-align: left; }
+  .muted { color: var(--muted); font-size: 10px; }
+  .aplin-status { color: var(--text); font-size: 20px; margin-top: 10px; }
+  .err { color: #ff6b6b; white-space: pre-wrap; }
+  canvas { margin-top: 4px; border: 1px solid var(--border); border-radius: 4px; width: 100%; height: auto; background: #0b0f14; }
+  iframe { border-color: var(--border) !important; background: #0b0f14; }
+  .section-sep { height: 1px; background: var(--border); margin: 4px 0; }
+
+  .layout { display: flex; gap: 4px; align-items: flex-start; }
+  .col-left { flex: 1 1 150px; min-width: 0; }
+  .col-right { flex: 1 1 150px; min-width: 0; }
+  @media (max-width: 900px) {
+    .layout { flex-direction: column; }
+    .col-right { width: 100%; }
+  }
+
+</style>
+</head>
+<body>
+<h1>Ross River Dam – Live Dashboard</h1>
+
+<div class="card">
+    <div class="layout">
+    <div class="col-left">
+<table>
+    <tr><th>Latest timestamp</th><td id="ts"></td></tr>
+
+    <tr><th>Sensor reading / Headwater level (m)</th><td id="level"></td></tr>
+
+    <tr><th>Storage (%)</th><td id="storPct"></td></tr>
+    <tr><th>Capacity (ML)</th><td id="capML"></td></tr>
+
+    <tr><th>Total discharge (m³/s)</th><td id="q"></td></tr>
+    <tr><th>Discharge (L/s)</th><td id="qLs"></td></tr>
+    <tr><th>Wheelie bins / s (120 L)</th><td id="bins"></td></tr>
+  </table>
+
+  <canvas id="plot" width="1040" height="320"></canvas>
+  <div class="muted">Sensor/headwater level and estimated discharge vs time</div>
+
+  <div id="aplin-status" class="aplin-status">Aplin Weir (id 532029) level vs time</div>
+  <canvas id="aplin-plot" width="1040" height="260"></canvas>
+    </div>
+
+    <div class="col-right">
+<iframe id="wheelie"
+    width="100%" height="750"
+    style="margin-top:14px;border:1px solid #ccc;border-radius:10px;"
+    loading="lazy"
+    referrerpolicy="no-referrer">
+  </iframe>
+    </div>
+  </div>
+
+  <div id="err" class="err"></div>
+</div>
+
+<script src="hwQ.js"></script>
+<script src="capRaw.js"></script>
+
+<script>
+
+/* =======================
+   Headwater → Total Q (m³/s)
+   (your earlier table)
+   ======================= */
+const hwQ = window.hwQ;
+
+function interpolate1D(x, pairs){
+  // pairs: [[x1,y1],[x2,y2],...] sorted by x ascending
+  if (!pairs.length) return null;
+  if (x <= pairs[0][0]) return pairs[0][1];
+  if (x >= pairs[pairs.length-1][0]) return pairs[pairs.length-1][1];
+
+  for (let i=0;i<pairs.length-1;i++){
+    const [x1,y1] = pairs[i];
+    const [x2,y2] = pairs[i+1];
+    if (x >= x1 && x <= x2){
+      const r = (x - x1) / (x2 - x1);
+      return y1 + r * (y2 - y1);
+    }
+  }
+  return null;
+}
+
+
+function formatTimestampAEST(ts){
+  const d = new Date(ts);
+  if (isNaN(d.getTime())) return String(ts);
+  return d.toLocaleString("en-AU", {
+    timeZone: "Australia/Brisbane",
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+    timeZoneName: "short"
+  });
+}
+
+function dischargeFromLevel(level){
+  // if below min, return 0 (as per your table)
+  if (level < hwQ[0][0]) return 0;
+  return interpolate1D(level, hwQ);
+}
+
+/* =======================
+   Sensor Reading → Capacity (ML) + Storage %
+   (your new table)
+   ======================= */
+/**
+ * Each row: [sensorReading, capacityML, storagePct]
+ * NOTE: I ignore the last outlier row (48m -> 12000 ML) by default.
+ */
+const capRaw = window.capRaw;
+
+// Build monotonic interpolation lists sorted by sensor reading.
+// Handle duplicates by keeping the max capacity/% for that reading.
+function buildCapTables() {
+  const m = new Map(); // reading -> {cap,pct}
+  for (const [reading, cap, pct] of capRaw) {
+    if (!Number.isFinite(reading) || !Number.isFinite(cap) || !Number.isFinite(pct)) continue;
+    const key = reading;
+    const prev = m.get(key);
+    if (!prev || cap > prev.cap) m.set(key, { cap, pct });
+  }
+  const rows = Array.from(m.entries()).map(([reading, v]) => [reading, v.cap, v.pct]);
+  rows.sort((a,b) => a[0]-b[0]);
+
+  const capPairs = rows.map(r => [r[0], r[1]]);
+  const pctPairs = rows.map(r => [r[0], r[2]]);
+  return { capPairs, pctPairs };
+}
+
+const { capPairs, pctPairs } = buildCapTables();
+
+function capacityFromReading(level){
+  return interpolate1D(level, capPairs);
+}
+function storagePctFromReading(level){
+  return interpolate1D(level, pctPairs);
+}
+
+function findSeriesById(api, targetId){
+  const target = String(targetId);
+  if (!api || !Array.isArray(api.sites)) return null;
+
+  for (const site of api.sites){
+    const siteId = String(site.id ?? site.site_id ?? site.siteId ?? "");
+    const siteName = String(site.name ?? site.station ?? "");
+    const siteTrend = site && site.state ? (site.state.trend || site.state.siteState || "") : "";
+
+    if (siteId === target && Array.isArray(site.data)){
+      if (site.data.length && site.data[0] && ("timestamp" in site.data[0]) && ("value" in site.data[0])){
+        return { name: siteName || "Aplin Weir", readings: site.data, trend: siteTrend };
+      }
+      const riverBlock = site.data.find(b => b && (b.type === "river" || b.type === "dam") && Array.isArray(b.data));
+      if (riverBlock) return { name: riverBlock.name || siteName || "Aplin Weir", readings: riverBlock.data, trend: siteTrend };
+      const anyBlock = site.data.find(b => b && Array.isArray(b.data));
+      if (anyBlock) return { name: anyBlock.name || siteName || "Aplin Weir", readings: anyBlock.data, trend: siteTrend };
+    }
+
+    if (Array.isArray(site.data)){
+      for (const block of site.data){
+        if (!block) continue;
+        const blockId = String(block.id ?? block.site_id ?? block.siteId ?? "");
+        const blockName = String(block.name ?? block.station ?? "");
+        if (blockId === target){
+          return { name: blockName || siteName || "Aplin Weir", readings: block.data || [], trend: siteTrend };
+        }
+        if (!blockId && blockName.toLowerCase().includes("aplin") && Array.isArray(block.data)){
+          return { name: blockName || siteName || "Aplin Weir", readings: block.data, trend: siteTrend };
+        }
+      }
+    }
+  }
+  return null;
+}
+
+/* =======================
+   Fetch + render
+   ======================= */
+async function load(){
+  const errBox = document.getElementById("err");
+  errBox.textContent = "";
+
+  try{
+    const url = "https://townsville.today/api/rivers/ross/data";
+    const r = await fetch(url, { cache: "no-store" });
+    if(!r.ok) throw new Error(`API request failed: HTTP ${r.status}`);
+
+    const api = await r.json();
+
+    if (!api.sites || !api.sites.length) throw new Error("Missing api.sites[] in response.");
+    const site0 = api.sites[0];
+    if (!site0.data || !Array.isArray(site0.data)) throw new Error("Missing sites[0].data[] in response.");
+
+    const damBlock = site0.data.find(x => x && x.type === "dam");
+    if (!damBlock) throw new Error("Could not find sites[0].data[] entry with type === 'dam'.");
+
+    const readings = damBlock.data;
+    if (!Array.isArray(readings) || readings.length === 0) throw new Error("Dam readings array is empty.");
+
+    // newest-first per your sample
+    const latest = readings[0];
+
+    const level = Number(latest.value);
+    const ts = String(latest.timestamp);
+    if (!Number.isFinite(level)) throw new Error("Latest dam level is not numeric: " + latest.value);
+
+    // Capacity + %
+    const capML = capacityFromReading(level);
+    const storPct = storagePctFromReading(level);
+
+    // Discharge + conversions
+    const q = dischargeFromLevel(level);
+    const qLs = q * 1000;
+    const bins = qLs / 120;
+
+    // Update table
+    document.getElementById("ts").textContent = formatTimestampAEST(ts);
+    document.getElementById("level").textContent = level.toFixed(2);
+
+    document.getElementById("capML").textContent =
+      (capML == null ? "—" : capML.toFixed(0));
+    document.getElementById("storPct").textContent =
+      (storPct == null ? "—" : storPct.toFixed(1) + "%");
+
+    document.getElementById("q").textContent = q.toFixed(0);
+    document.getElementById("qLs").textContent = qLs.toFixed(0);
+    document.getElementById("bins").textContent = bins.toFixed(2);
+
+    // Build plot points (chronological)
+    const pts = readings
+      .map(d => ({ t: new Date(d.timestamp), level: Number(d.value) }))
+      .filter(p => Number.isFinite(p.level) && !isNaN(p.t.getTime()))
+      .sort((a,b) => a.t - b.t)
+      .map(p => ({ ...p, q: dischargeFromLevel(p.level) }));
+
+    if (pts.length >= 2) drawPlot(pts);
+
+    // Aplin Weir (id 532029)
+    const aplin = findSeriesById(api, "532029");
+    const aplinStatus = document.getElementById("aplin-status");
+    if (aplin && Array.isArray(aplin.readings) && aplin.readings.length){
+      const aplinPts = aplin.readings
+        .map(d => ({ t: new Date(d.timestamp), value: Number(d.value) }))
+        .filter(p => Number.isFinite(p.value) && !isNaN(p.t.getTime()))
+        .sort((a,b) => a.t - b.t);
+      if (aplinPts.length >= 2){
+        const latestAplin = aplinPts[aplinPts.length - 1];
+        const trendTxt = aplin.trend ? `, trend ${aplin.trend}` : "";
+        drawSinglePlot(aplinPts, "aplin-plot", aplin.name || "Aplin Weir", "#6ee7b7");
+        aplinStatus.textContent =
+          `${aplin.name || "Aplin Weir"} latest ${latestAplin.value.toFixed(2)}${trendTxt}`;
+      } else {
+        aplinStatus.textContent = "Aplin Weir has insufficient data.";
+      }
+    } else {
+      aplinStatus.textContent = "Aplin Weir not found in API response.";
+    }
+
+    // Wheelie iframe (flow = L/s)
+    document.getElementById("wheelie").src =
+      `https://polner.dev/projects/wheelie.html?flow=${Math.max(0, Math.round(qLs))}`;
+
+  }catch(e){
+    errBox.textContent = String(e);
+  }
+}
+
+function drawSinglePlot(points, canvasId, label, color){
+  const c = document.getElementById(canvasId);
+  const g = c.getContext("2d");
+  const padL=85, padR=30, padT=25, padB=60;
+  const w=c.width-padL-padR, h=c.height-padT-padB;
+
+  const t0=points[0].t.getTime(), t1=points[points.length-1].t.getTime();
+  const vMin=Math.min(...points.map(p=>p.value));
+  const vMax=Math.max(...points.map(p=>p.value));
+
+  const x=(t)=>padL+((t-t0)/(t1-t0||1))*w;
+  const yV=(v)=>padT+(1-((v-vMin)/(vMax-vMin||1)))*h;
+
+  const pad2 = n => String(n).padStart(2,"0");
+  const fmt = d => `${pad2(d.getDate())}/${pad2(d.getMonth()+1)} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+
+  const render = (hoverIdx) => {
+    g.clearRect(0,0,c.width,c.height);
+
+    g.strokeStyle="#444";
+    g.lineWidth=1;
+    g.beginPath();
+    g.moveTo(padL,padT);
+    g.lineTo(padL,padT+h);
+    g.lineTo(padL+w,padT+h);
+    g.stroke();
+
+    g.fillStyle="#c9d1d9";
+    g.font="10px system-ui, sans-serif";
+    g.fillText(label, 4, 16);
+
+    const ticks = 5;
+    g.strokeStyle="#2b3442";
+    g.fillStyle="#9aa4b2";
+    g.font="10px system-ui, sans-serif";
+    for (let i=0;i<=ticks;i++){
+      const r = i / ticks;
+      const y = padT + (1 - r) * h;
+      const val = vMin + r * (vMax - vMin || 1);
+      g.beginPath();
+      g.moveTo(padL-6, y);
+      g.lineTo(padL, y);
+      g.stroke();
+      g.fillText(val.toFixed(2), 4, y + 4);
+    }
+    for (let i=0;i<=ticks;i++){
+      const r = i / ticks;
+      const xPos = padL + r * w;
+      const t = new Date(t0 + r * (t1 - t0 || 1));
+      const labelTxt = fmt(t);
+      g.beginPath();
+      g.moveTo(xPos, padT+h);
+      g.lineTo(xPos, padT+h+6);
+      g.stroke();
+      const tw = g.measureText(labelTxt).width;
+      g.fillText(labelTxt, xPos - tw/2, c.height - 10);
+    }
+
+    // Aplin threshold lines
+    const thresholds = [
+      { value: 1.1, color: "#22c55e" },
+      { value: 1.6, color: "#f59e0b" },
+      { value: 1.8, color: "#ef4444" },
+    ];
+    thresholds.forEach(t => {
+      const y = yV(t.value);
+      g.strokeStyle=t.color;
+      g.lineWidth=1.5;
+      g.beginPath();
+      g.moveTo(padL, y);
+      g.lineTo(padL + w, y);
+      g.stroke();
+    });
+
+    g.strokeStyle=color;
+    g.lineWidth=2;
+    g.beginPath();
+    points.forEach((p,i)=>{ const X=x(p.t.getTime()), Y=yV(p.value); i?g.lineTo(X,Y):g.moveTo(X,Y); });
+    g.stroke();
+    g.fillStyle=color;
+    points.forEach(p=>{ const X=x(p.t.getTime()), Y=yV(p.value); g.beginPath(); g.arc(X,Y,2.5,0,Math.PI*2); g.fill(); });
+
+    if (hoverIdx >= 0 && hoverIdx < points.length){
+      const p = points[hoverIdx];
+      const X = x(p.t.getTime());
+      const Y = yV(p.value);
+      g.strokeStyle="#6b7787";
+      g.lineWidth=1;
+      g.beginPath();
+      g.moveTo(X, padT);
+      g.lineTo(X, padT+h);
+      g.stroke();
+
+      g.fillStyle="#ffffff";
+      g.beginPath();
+      g.arc(X, Y, 4.5, 0, Math.PI*2);
+      g.fill();
+      g.fillStyle="#000000";
+      g.beginPath();
+      g.arc(X, Y, 3, 0, Math.PI*2);
+      g.fill();
+
+      const tip = `${fmt(p.t)} | ${p.value.toFixed(2)}`;
+      g.font="10px system-ui, sans-serif";
+      const tw = g.measureText(tip).width + 10;
+      const tx = Math.min(c.width - tw - 6, Math.max(6, X - tw/2));
+      const ty = padT + 6;
+      g.fillStyle="rgba(0,0,0,0.7)";
+      g.fillRect(tx, ty, tw, 20);
+      g.fillStyle="#ffffff";
+      g.fillText(tip, tx + 5, ty + 14);
+    }
+  };
+
+  render(-1);
+
+  if (!c._plotHandlers){
+    c.addEventListener("mousemove", (e) => {
+      const rect = c.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) * (c.width / rect.width);
+      let best = -1;
+      let bestDist = Infinity;
+      for (let i=0;i<points.length;i++){
+        const px = x(points[i].t.getTime());
+        const d = Math.abs(mx - px);
+        if (d < bestDist){
+          bestDist = d;
+          best = i;
+        }
+      }
+      render(best);
+    });
+    c.addEventListener("mouseleave", () => render(-1));
+    c._plotHandlers = true;
+  }
+}
+
+/* =======================
+   Simple dual-series plot (canvas)
+   ======================= */
+function drawPlot(points){
+  const c = document.getElementById("plot");
+  const g = c.getContext("2d");
+  const padL=85, padR=30, padT=25, padB=60;
+  const w=c.width-padL-padR, h=c.height-padT-padB;
+
+  const t0=points[0].t.getTime(), t1=points[points.length-1].t.getTime();
+  const lMin=Math.min(...points.map(p=>p.level));
+  const lMax=Math.max(...points.map(p=>p.level));
+  const qMin=Math.min(...points.map(p=>p.q));
+  const qMax=Math.max(...points.map(p=>p.q));
+
+  const x=(t)=>padL+((t-t0)/(t1-t0||1))*w;
+  const yL=(v)=>padT+(1-((v-lMin)/(lMax-lMin||1)))*h;
+  const yQ=(v)=>padT+(1-((v-qMin)/(qMax-qMin||1)))*h;
+
+  const pad2 = n => String(n).padStart(2,"0");
+  const fmt = d => `${pad2(d.getDate())}/${pad2(d.getMonth()+1)} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+
+  const render = (hoverIdx) => {
+    g.clearRect(0,0,c.width,c.height);
+
+    // axes
+    g.strokeStyle="#444";
+    g.lineWidth=1;
+    g.beginPath();
+    g.moveTo(padL,padT);
+    g.lineTo(padL,padT+h);
+    g.lineTo(padL+w,padT+h);
+    g.stroke();
+
+    // legend
+    g.fillStyle="#c9d1d9";
+    g.font="10px system-ui, sans-serif";
+    g.strokeStyle="#4ea1ff";
+    g.lineWidth=2;
+    g.beginPath();
+    g.moveTo(padL + 6, 14);
+    g.lineTo(padL + 20, 14);
+    g.stroke();
+    g.fillText("Level (m)", padL + 24, 17);
+
+    g.strokeStyle="#ff9f4a";
+    g.lineWidth=2;
+    g.beginPath();
+    g.moveTo(padL + 6, 28);
+    g.lineTo(padL + 20, 28);
+    g.stroke();
+    g.fillText("Q (m3/s)", padL + 24, 31);
+
+    // ticks and labels
+    const ticks = 5;
+    g.strokeStyle="#2b3442";
+    g.fillStyle="#9aa4b2";
+    g.font="10px system-ui, sans-serif";
+    for (let i=0;i<=ticks;i++){
+      const r = i / ticks;
+      const y = padT + (1 - r) * h;
+      const lvl = lMin + r * (lMax - lMin || 1);
+      g.beginPath();
+      g.moveTo(padL-6, y);
+      g.lineTo(padL, y);
+      g.stroke();
+      g.fillText(lvl.toFixed(2), 4, y + 4);
+    }
+    for (let i=0;i<=ticks;i++){
+      const r = i / ticks;
+      const xPos = padL + r * w;
+      const t = new Date(t0 + r * (t1 - t0 || 1));
+      const label = fmt(t);
+      g.beginPath();
+      g.moveTo(xPos, padT+h);
+      g.lineTo(xPos, padT+h+6);
+      g.stroke();
+      const tw = g.measureText(label).width;
+      g.fillText(label, xPos - tw/2, c.height - 10);
+    }
+
+    // level line + markers
+    g.strokeStyle="#4ea1ff";
+    g.lineWidth=2;
+    g.beginPath();
+    points.forEach((p,i)=>{ const X=x(p.t.getTime()), Y=yL(p.level); i?g.lineTo(X,Y):g.moveTo(X,Y); });
+    g.stroke();
+    g.fillStyle="#4ea1ff";
+    points.forEach(p=>{ const X=x(p.t.getTime()), Y=yL(p.level); g.beginPath(); g.arc(X,Y,2.5,0,Math.PI*2); g.fill(); });
+
+    // discharge line + markers
+    g.strokeStyle="#ff9f4a";
+    g.lineWidth=2;
+    g.beginPath();
+    points.forEach((p,i)=>{ const X=x(p.t.getTime()), Y=yQ(p.q); i?g.lineTo(X,Y):g.moveTo(X,Y); });
+    g.stroke();
+    g.fillStyle="#ff9f4a";
+    points.forEach(p=>{ const X=x(p.t.getTime()), Y=yQ(p.q); g.beginPath(); g.arc(X,Y,2.5,0,Math.PI*2); g.fill(); });
+
+    // dam threshold line (38.55 m)
+    const yThresh = yL(38.55);
+    g.strokeStyle="#ef4444";
+    g.lineWidth=1.5;
+    g.beginPath();
+    g.moveTo(padL, yThresh);
+    g.lineTo(padL + w, yThresh);
+    g.stroke();
+
+    // hover highlight
+    if (hoverIdx >= 0 && hoverIdx < points.length){
+      const p = points[hoverIdx];
+      const X = x(p.t.getTime());
+      const YL = yL(p.level);
+      const YQ = yQ(p.q);
+      g.strokeStyle="#6b7787";
+      g.lineWidth=1;
+      g.beginPath();
+      g.moveTo(X, padT);
+      g.lineTo(X, padT+h);
+      g.stroke();
+
+      g.fillStyle="#ffffff";
+      g.beginPath();
+      g.arc(X, YL, 4.5, 0, Math.PI*2);
+      g.fill();
+      g.fillStyle="#000000";
+      g.beginPath();
+      g.arc(X, YL, 3, 0, Math.PI*2);
+      g.fill();
+
+      g.fillStyle="#ffffff";
+      g.beginPath();
+      g.arc(X, YQ, 4.5, 0, Math.PI*2);
+      g.fill();
+      g.fillStyle="#000000";
+      g.beginPath();
+      g.arc(X, YQ, 3, 0, Math.PI*2);
+      g.fill();
+
+      const tip = `${fmt(p.t)} | Level ${p.level.toFixed(2)} m | Q ${p.q.toFixed(0)} mA3/s`;
+      g.font="10px system-ui, sans-serif";
+      const tw = g.measureText(tip).width + 10;
+      const tx = Math.min(c.width - tw - 6, Math.max(6, X - tw/2));
+      const ty = padT + 6;
+      g.fillStyle="rgba(0,0,0,0.7)";
+      g.fillRect(tx, ty, tw, 20);
+      g.fillStyle="#ffffff";
+      g.fillText(tip, tx + 5, ty + 14);
+    }
+  };
+
+  render(-1);
+
+  if (!c._plotHandlers){
+    c.addEventListener("mousemove", (e) => {
+      const rect = c.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) * (c.width / rect.width);
+      let best = -1;
+      let bestDist = Infinity;
+      for (let i=0;i<points.length;i++){
+        const px = x(points[i].t.getTime());
+        const d = Math.abs(mx - px);
+        if (d < bestDist){
+          bestDist = d;
+          best = i;
+        }
+      }
+      render(best);
+    });
+    c.addEventListener("mouseleave", () => render(-1));
+    c._plotHandlers = true;
+  }
+}
+
+load();
+</script>
+</body>
+</html>
