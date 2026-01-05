@@ -103,7 +103,7 @@
     <tr><th>Capacity (ML)</th><td id="capML"></td></tr>
     <tr><th>Total discharge (m³/s)</th><td id="q"></td></tr>
     <tr><th>Discharge (L/s)</th><td id="qLs"></td></tr>
-    <tr><th>Wheelie bins / s (120 L)</th><td id="bins"></td></tr>
+    <tr><th>Wheelie bins/s (120 L)</th><td id="bins"></td></tr>
   </table>
   <canvas id="plot" width="1040" height="290"></canvas>
   <div class="muted">Sensor/headwater level and estimated discharge vs time</div>
@@ -182,6 +182,12 @@ function formatDateDMY(date){
   return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()}`;
 }
 
+function formatRainValue(value){
+  const n = Number(String(value).replace(/[^0-9.+-]/g, ""));
+  if (!Number.isFinite(n)) return "0";
+  return String(Math.round(n));
+}
+
 function parseIssuedDate(text){
   if (!text) return null;
   const m = text.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
@@ -215,7 +221,7 @@ function updateRainfallTotals(){
       if (Number.isFinite(n)) sum += n;
     });
     const totalCell = row.querySelector(".row-total");
-    if (totalCell) totalCell.textContent = String(Math.round(sum * 10) / 10);
+    if (totalCell) totalCell.textContent = String(Math.round(sum));
   });
 }
 
@@ -297,7 +303,7 @@ function fillRainfallTableFromHtml(htmlText){
     const values = cells.slice(1, 9).map(c => (c.textContent || "").trim());
     const outCells = row.querySelectorAll(".rain-cell");
     for (let i = 0; i < outCells.length && i < values.length; i++){
-      outCells[i].textContent = values[i] || "0";
+      outCells[i].textContent = formatRainValue(values[i]);
     }
   });
 
