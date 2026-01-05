@@ -1,0 +1,37 @@
+name: Download BOM FTP File (Hourly)
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # every hour on the hour (UTC)
+  workflow_dispatch:      # allows manual run from GitHub UI
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create output directory
+        run: mkdir -p bom_data
+
+      - name: Download BOM file via FTP
+        run: |
+          curl -f \
+            ftp://ftp.bom.gov.au/anon/gen/fwo/IDQ60364.html \
+            -o bom_data/IDQ60364.html
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add bom_data/IDQ60364.html
+
+          if git diff --cached --quiet; then
+            echo "No changes detected"
+          else
+            git commit -m "Hourly update: IDQ60364.html"
+            git push
+          fi
