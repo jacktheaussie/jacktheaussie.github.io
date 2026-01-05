@@ -21,6 +21,10 @@
   th, td { padding: 4px 4px; border-bottom: 1px solid var(--border); text-align: left; }
   .muted { color: var(--muted); font-size: 10px; }
   .aplin-status { color: var(--text); font-size: 20px; margin-top: 10px; }
+  .extra-links { margin: 6px 0 0 16px; padding: 0; }
+  .extra-links li { margin: 4px 0; }
+  .extra-links a { color: var(--accent); text-decoration: none; font-size: 10px; }
+  .extra-links a:hover { text-decoration: underline; }
   .err { color: #ff6b6b; white-space: pre-wrap; }
   canvas { margin-top: 4px; border: 1px solid var(--border); border-radius: 4px; width: 100%; height: auto; background: #0b0f14; }
   iframe { border-color: var(--border) !important; background: #0b0f14; }
@@ -60,6 +64,13 @@
 
   <div id="aplin-status" class="aplin-status">Aplin Weir (id 532029) level vs time</div>
   <canvas id="aplin-plot" width="1040" height="260"></canvas>
+  <div class="muted" style="margin-top:6px;">Other weather links</div>
+  <ul class="extra-links">
+    <li><a href="https://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDQ60364.html" rel="noopener">Add link 1</a></li>
+    <li><a href="https://www.bom.gov.au/cyclone/7dayforecast/" rel="noopener">Add link 2</a></li>
+    <li><a href="http://hurricanes.ral.ucar.edu/realtime/current/" rel="noopener">Add link 3</a></li>
+    <li><a href="https://www.metoc.navy.mil/jtwc/jtwc.html" rel="noopener">Add link 3</a></li>
+  </ul>
     </div>
 
     <div class="col-right">
