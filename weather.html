@@ -145,7 +145,11 @@ function buildCapTables() {
     if (!Number.isFinite(reading) || !Number.isFinite(cap) || !Number.isFinite(pct)) continue;
     const key = reading;
     const prev = m.get(key);
-    if (!prev || cap > prev.cap) m.set(key, { cap, pct });
+    if (!prev) {
+      m.set(key, { cap, pct });
+    } else {
+      m.set(key, { cap: Math.max(prev.cap, cap), pct: Math.min(prev.pct, pct) });
+    }
   }
   const rows = Array.from(m.entries()).map(([reading, v]) => [reading, v.cap, v.pct]);
   rows.sort((a,b) => a[0]-b[0]);
@@ -607,4 +611,3 @@ load();
 </script>
 </body>
 </html>
-
