@@ -257,7 +257,9 @@ async function load(){
 
     // Update table
     document.getElementById("ts").textContent = formatTimestampAEST(ts);
-    document.getElementById("level").textContent = level.toFixed(2);
+    const damSite = findSeriesById(api, "532020");
+    const damTrend = damSite && damSite.trend ? ` (${damSite.trend})` : "";
+    document.getElementById("level").textContent = level.toFixed(2) + damTrend;
 
     document.getElementById("capML").textContent =
       (capML == null ? "—" : capML.toFixed(0));
