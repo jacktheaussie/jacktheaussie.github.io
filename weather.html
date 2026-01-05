@@ -16,9 +16,9 @@
   }
   body { font-family: system-ui, sans-serif; margin: 20px; background: var(--bg); color: var(--text); }
   .card { border: 1px solid var(--border); border-radius: 4px; padding: 4px; max-width: 99%; width: 99%; background: var(--card); }
-  h1 { margin-top: 0; }
-  table { width: 90%; border-collapse: collapse; margin-top: 4px; }
-  th, td { padding: 4px 4px; border-bottom: 1px solid var(--border); text-align: left; }
+  h1 {font-size: 16px; margin-top: 0; }
+  table { width: 45%; border-collapse: collapse; margin-top: 4px; }
+  th, td { font-size: 12px; padding: 4px 4px; border-bottom: 1px solid var(--border); text-align: left; }
   .muted { color: var(--muted); font-size: 10px; }
   .aplin-status { color: var(--text); font-size: 20px; margin-top: 10px; }
   .extra-links { margin: 6px 0 0 16px; padding: 0; }
@@ -31,7 +31,7 @@
   .section-sep { height: 1px; background: var(--border); margin: 4px 0; }
 
   .rainfall-table { width: 60%; margin-top: 6px; font-size: 11px; }
-  .rainfall-table th, .rainfall-table td { padding: 4px; }
+  .rainfall-table th, .rainfall-table td { padding: 2px; }
   .rainfall-table thead th { font-weight: 600; }
 
   .layout { display: flex; gap: 4px; align-items: flex-start; }
@@ -105,10 +105,10 @@
     <tr><th>Discharge (L/s)</th><td id="qLs"></td></tr>
     <tr><th>Wheelie bins / s (120 L)</th><td id="bins"></td></tr>
   </table>
-  <canvas id="plot" width="1040" height="320"></canvas>
+  <canvas id="plot" width="1040" height="290"></canvas>
   <div class="muted">Sensor/headwater level and estimated discharge vs time</div>
   <div id="aplin-status" class="aplin-status">Aplin Weir (id 532029) level vs time</div>
-  <canvas id="aplin-plot" width="1040" height="260"></canvas>
+  <canvas id="aplin-plot" width="1040" height="250"></canvas>
   <div class="aplin-status" style="margin-top:6px;">Other weather links</div>
   <ul class="extra-links">
     <li><a href="https://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDQ60364.html" rel="noopener">BOM 7 Day Rainfall</a></li>
