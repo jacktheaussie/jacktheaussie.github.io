@@ -45,7 +45,7 @@
 </style>
 </head>
 <body>
-<h1>Ross River Dam â€“ Live Dashboard</h1>
+<h1>Ross River Dam - Live Dashboard</h1>
 <div class="card">
     <div class="layout">
     <div class="col-left">
@@ -101,7 +101,7 @@
     <tr><th>Sensor reading / Headwater level (m)</th><td id="level"></td></tr>
     <tr><th>Storage (%)</th><td id="storPct"></td></tr>
     <tr><th>Capacity (ML)</th><td id="capML"></td></tr>
-    <tr><th>Total discharge (mÂ³/s)</th><td id="q"></td></tr>
+    <tr><th>Total discharge (m³/s)</th><td id="q"></td></tr>
     <tr><th>Discharge (L/s)</th><td id="qLs"></td></tr>
     <tr><th>Wheelie bins/s (120 L)</th><td id="bins"></td></tr>
   </table>
@@ -135,7 +135,7 @@
 
 <script>
 /* =======================
-   Headwater â†’ Total Q (mÂ³/s)
+   Headwater †’ Total Q (m³/s)
    (your earlier table)
    ======================= */
 const hwQ = window.hwQ;
@@ -332,7 +332,7 @@ function dischargeFromLevel(level){
 }
 
 /* =======================
-   Sensor Reading â†’ Capacity (ML) + Storage %
+   Sensor Reading †’ Capacity (ML) + Storage %
    (your new table)
    ======================= */
 /**
@@ -459,9 +459,9 @@ async function load(){
     document.getElementById("level").textContent = level.toFixed(2) + damTrend;
 
     document.getElementById("capML").textContent =
-      (capML == null ? "â€”" : capML.toFixed(0));
+      (capML == null ? "”" : capML.toFixed(0));
     document.getElementById("storPct").textContent =
-      (storPct == null ? "â€”" : storPct.toFixed(1) + "%");
+      (storPct == null ? "”" : storPct.toFixed(1) + "%");
 
     document.getElementById("q").textContent = q.toFixed(0);
     document.getElementById("qLs").textContent = qLs.toFixed(0);
