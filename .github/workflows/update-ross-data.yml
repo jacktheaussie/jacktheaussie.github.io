@@ -1,0 +1,27 @@
+﻿name: Update Ross River data
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download latest data
+        run: |
+          mkdir -p data
+          curl -fsSL "https://townsville.today/api/rivers/ross/data" -o data/ross_data.json
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ross_data.json
+          git commit -m "Update Ross River data"
+          git push
