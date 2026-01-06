@@ -276,7 +276,7 @@ function fillRainfallTableFromHtml(htmlText){
       }
       for (let i = 0; i < ths.length; i++){
         if (i < 7) ths[i].textContent = dates[i];
-        else ths[i].textContent = `Since 9am ${formatDateDMY(issuedDate)}`;
+        // else ths[i].textContent = `Since 9am ${formatDateDMY(issuedDate)}`;
       }
     } else {
       const headers = dayHeaders.length === 7 ? [...dayHeaders, sinceLabel] : [];
