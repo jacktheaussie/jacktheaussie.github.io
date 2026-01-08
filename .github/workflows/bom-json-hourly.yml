@@ -1,0 +1,81 @@
+name: Hourly BoM JSON snapshot (Townsville)
+
+on:
+  schedule:
+    - cron: "0 * * * *" # hourly (UTC)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bom-json-hourly
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check JSON exists
+        id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://www.bom.gov.au/fwo/IDQ60801/IDQ60801.94294.json"
+
+          if curl --silent --fail --head "$URL" >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "JSON exists."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "JSON missing/unreachable."
+          fi
+
+      - name: Stop if JSON does not exist
+        if: steps.check.outputs.exists == 'false'
+        shell: bash
+        run: |
+          echo "Stopping run: source JSON not available."
+          exit 0
+
+      - name: Download JSON snapshot
+        if: steps.check.outputs.exists == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://www.bom.gov.au/fwo/IDQ60801/IDQ60801.94294.json"
+
+          mkdir -p snapshots_json
+
+          ts="$(date -u '+%Y-%m-%d_%H-%M')"
+          out="snapshots_json/IDQ60801.94294_${ts}.json"
+
+          curl -fL --retry 5 --retry-delay 5 \
+            "$URL" \
+            -o "$out"
+
+          echo "Saved: $out"
+
+      - name: Commit & push snapshot
+        if: steps.check.outputs.exists == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add snapshots_json/*.json
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Add BoM JSON snapshot IDQ60801.94294 ($(date -u '+%Y-%m-%d %H:%M UTC'))"
+          git push
