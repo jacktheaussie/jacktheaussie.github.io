@@ -16,18 +16,21 @@ jobs:
       - name: Create output directory
         run: mkdir -p bom_data
 
-      - name: Download BOM file via FTP
+      - name: Download BOM files
         run: |
           curl -f \
             ftp://ftp.bom.gov.au/anon/gen/fwo/IDQ60364.html \
             -o bom_data/IDQ60364.html
+          curl -f \
+            https://www.bom.gov.au/products/IDQ60801/IDQ60801.94294.shtml \
+            -o bom_data/IDQ60801.94294.shtml
 
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          git add bom_data/IDQ60364.html
+          git add bom_data/IDQ60364.html bom_data/IDQ60801.94294.shtml
 
           if git diff --cached --quiet; then
             echo "No changes detected"
