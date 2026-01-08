@@ -1,0 +1,202 @@
+name: Hourly BoM image snapshot
+
+on:
+  schedule:
+    - cron: "0 * * * *" # hourly (UTC)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: bom-image-hourly
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Load state
+        id: load
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .bom_state
+          STATE_FILE=".bom_state/IDQ65001.state"
+
+          failures=0
+          last_success_utc="never"
+
+          if [[ -f "$STATE_FILE" ]]; then
+            # shellcheck disable=SC1090
+            source "$STATE_FILE" || true
+          fi
+
+          echo "failures=$failures" >> "$GITHUB_OUTPUT"
+          echo "last_success_utc=$last_success_utc" >> "$GITHUB_OUTPUT"
+
+      - name: Check if image exists (FTP HEAD)
+        id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="ftp://ftp.bom.gov.au/anon/gen/fwo/IDQ65001.png"
+
+          if curl --silent --fail --head "$URL" >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Handle failure (increment counter, maybe stop after 4)
+        if: steps.check.outputs.exists == 'false'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          STATE_FILE=".bom_state/IDQ65001.state"
+          WORKFLOW_FILE=".github/workflows/bom-image-hourly.yml"
+          URL="ftp://ftp.bom.gov.au/anon/gen/fwo/IDQ65001.png"
+
+          failures="${{ steps.load.outputs.failures }}"
+          last_success_utc="${{ steps.load.outputs.last_success_utc }}"
+
+          failures=$((failures + 1))
+          now_utc="$(date -u '+%Y-%m-%d %H:%M UTC')"
+
+          cat > "$STATE_FILE" <<EOF
+failures=${failures}
+last_success_utc=${last_success_utc}
+last_checked_utc=${now_utc}
+EOF
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add "$STATE_FILE"
+          git commit -m "Update BoM state: failure ${failures}/4 (IDQ65001) @ ${now_utc}" || true
+          git push || true
+
+          echo "Consecutive failures: ${failures}/4"
+
+          if [[ "$failures" -lt 4 ]]; then
+            echo "Not stopping yet."
+            exit 0
+          fi
+
+          echo "Reached 4 consecutive failures. Creating issue + disabling schedule."
+
+          # Create a GitHub Issue
+          repo="${GITHUB_REPOSITORY}"
+          issue_title="BoM snapshot stopped: IDQ65001 missing/unreachable (4 consecutive failures)"
+          issue_body="$(cat <<BODY
+The hourly BoM snapshot workflow has disabled its **schedule** after **4 consecutive failures**.
+
+- Product: IDQ65001.png
+- Source: ${URL}
+- Time stopped: ${now_utc}
+- Last successful download (UTC): ${last_success_utc}
+
+To re-enable, add the schedule trigger back into:
+${WORKFLOW_FILE}
+BODY
+)"
+
+          python3 - <<PY
+import json, os, urllib.request
+repo = os.environ["GITHUB_REPOSITORY"]
+token = os.environ["GH_TOKEN"]
+title = ${issue_title!r}
+body = ${issue_body!r}
+
+req = urllib.request.Request(
+    f"https://api.github.com/repos/{repo}/issues",
+    data=json.dumps({"title": title, "body": body}).encode("utf-8"),
+    headers={
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "github-actions"
+    },
+    method="POST",
+)
+urllib.request.urlopen(req).read()
+PY
+
+          # Disable scheduled trigger by removing the "schedule:" block under "on:"
+          python3 - <<'PY'
+import pathlib, re
+
+p = pathlib.Path(".github/workflows/bom-image-hourly.yml")
+lines = p.read_text(encoding="utf-8").splitlines(True)
+
+out = []
+i = 0
+while i < len(lines):
+    line = lines[i]
+    if re.match(r'^\s*schedule:\s*$', line):
+        # skip this line
+        i += 1
+        # skip any subsequent indented cron lines (typically "  - cron: ...")
+        while i < len(lines) and re.match(r'^\s*-\s*cron:\s*', lines[i]):
+            i += 1
+        continue
+    out.append(line)
+    i += 1
+
+p.write_text("".join(out), encoding="utf-8")
+PY
+
+          git add "$WORKFLOW_FILE"
+          git commit -m "Disable BoM snapshot schedule after 4 consecutive failures (IDQ65001)"
+          git push
+
+          echo "Disabled schedule. Exiting."
+          exit 0
+
+      - name: Download snapshot + reset state on success
+        if: steps.check.outputs.exists == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          URL="ftp://ftp.bom.gov.au/anon/gen/fwo/IDQ65001.png"
+          mkdir -p snapshots .bom_state
+
+          ts="$(date -u '+%Y-%m-%d_%H-%M')"
+          out="snapshots/IDQ65001_${ts}.png"
+
+          curl -fL --retry 5 --retry-delay 5 "$URL" -o "$out"
+
+          now_utc="$(date -u '+%Y-%m-%d %H:%M UTC')"
+          cat > ".bom_state/IDQ65001.state" <<EOF
+failures=0
+last_success_utc=${now_utc}
+last_checked_utc=${now_utc}
+EOF
+
+      - name: Commit snapshot + state
+        if: steps.check.outputs.exists == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add snapshots/*.png .bom_state/IDQ65001.state
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Add BoM IDQ65001 snapshot ($(date -u '+%Y-%m-%d %H:%M UTC'))"
+          git push
