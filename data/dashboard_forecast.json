@@ -1,0 +1,25 @@
+{
+  "source": "https://www.bom.gov.au/places/qld/townsville-city/forecast",
+  "issued_at": "9:23 am AEST on Sunday 10 May 2026",
+  "generated_at": "2026-05-10T13:35:00+00:00",
+  "days": [
+    {
+      "label": "Sunday",
+      "date": "2026-05-10",
+      "min": 19,
+      "max": 29,
+      "rainfall": "0 mm",
+      "rainChance": "10%",
+      "summary": "Partly cloudy. Slight chance of a shower in the north, near zero chance elsewhere. Winds easterly 15 to 25 km/h becoming light in the late evening. Daytime maximum temperatures 25 to 30."
+    },
+    {
+      "label": "Monday",
+      "date": "2026-05-11",
+      "min": 20,
+      "max": 29,
+      "rainfall": "0 to 1 mm",
+      "rainChance": "40%",
+      "summary": "Cloudy. Medium chance of showers in the north, slight chance elsewhere. Winds east to southeasterly and light becoming southeasterly 15 to 20 km/h in the early morning then tending easterly 20 to 30 km/h in the morning. Overnight temperatures falling to between 17 and 21 with daytime temperatures reaching the mid to high 20s."
+    }
+  ]
+}

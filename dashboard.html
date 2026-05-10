@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Townsville Dashboard</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #09111a;
+    --bg-accent: #102033;
+    --card: rgba(10, 18, 29, 0.9);
+    --card-strong: rgba(13, 24, 38, 0.96);
+    --text: #ecf3fb;
+    --muted: #94a8bc;
+    --border: rgba(120, 154, 191, 0.25);
+    --accent: #6dc5ff;
+    --accent-2: #57e3b4;
+    --warn: #ffcf6e;
+    --danger: #ff8d7c;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(92, 167, 255, 0.18), transparent 28%),
+      radial-gradient(circle at top right, rgba(87, 227, 180, 0.12), transparent 24%),
+      linear-gradient(180deg, var(--bg-accent) 0%, var(--bg) 55%, #071019 100%);
+  }
+
+  .page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  .hero {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: end;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 44px);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .subtitle {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .stamp {
+    text-align: right;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 18px;
+  }
+
+  .stack {
+    display: grid;
+    gap: 18px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(8px);
+  }
+
+  .card h2 {
+    margin: 0 0 14px;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  .forecast-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .forecast-card {
+    padding: 16px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(109, 197, 255, 0.12), rgba(255, 255, 255, 0.03));
+    border: 1px solid rgba(109, 197, 255, 0.16);
+  }
+
+  .forecast-card h3 {
+    margin: 0 0 6px;
+    font-size: 19px;
+  }
+
+  .forecast-temp {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    margin: 8px 0;
+  }
+
+  .forecast-meta,
+  .calendar-item-meta,
+  .stat-note,
+  .empty,
+  .error {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .forecast-summary {
+    font-size: 14px;
+    line-height: 1.45;
+    margin-top: 10px;
+  }
+
+  .calendar-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .calendar-day {
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .calendar-day h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+  }
+
+  .calendar-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .calendar-item {
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--card-strong);
+    border: 1px solid rgba(87, 227, 180, 0.14);
+  }
+
+  .calendar-item-title {
+    font-size: 15px;
+    margin: 0 0 4px;
+  }
+
+  .calendar-item-source {
+    display: inline-block;
+    margin-bottom: 6px;
+    color: var(--accent-2);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .river-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .river-stat {
+    padding: 14px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(87, 227, 180, 0.09), rgba(255, 255, 255, 0.03));
+    border: 1px solid rgba(87, 227, 180, 0.16);
+  }
+
+  .river-stat-label {
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .river-stat-value {
+    margin-top: 8px;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+  }
+
+  .river-detail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .river-detail .cardlet {
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .muted-link {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .muted-link:hover { text-decoration: underline; }
+  .empty { padding: 4px 0; }
+  .error { color: var(--danger); }
+
+  @media (max-width: 980px) {
+    .grid,
+    .calendar-columns,
+    .forecast-grid,
+    .river-grid,
+    .river-detail {
+      grid-template-columns: 1fr;
+    }
+
+    .hero {
+      flex-direction: column;
+      align-items: start;
+    }
+
+    .stamp {
+      text-align: left;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hero">
+    <div>
+      <h1>Townsville Dashboard</h1>
+      <p class="subtitle">Townsville BOM outlook, next two days of calendar activity, and Ross River Dam storage.</p>
+    </div>
+    <div class="stamp">
+      <div id="page-updated">Loading…</div>
+      <div><a class="muted-link" href="weather.html">Open Ross River dashboard</a></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="stack">
+      <section class="card">
+        <h2>Weather</h2>
+        <div id="forecast-grid" class="forecast-grid"></div>
+        <div id="forecast-status" class="stat-note"></div>
+      </section>
+
+      <section class="card">
+        <h2>Calendar</h2>
+        <div id="calendar-columns" class="calendar-columns"></div>
+        <div id="calendar-status" class="stat-note"></div>
+      </section>
+    </div>
+
+    <div class="stack">
+      <section class="card">
+        <h2>Ross River Capacity</h2>
+        <div id="river-grid" class="river-grid"></div>
+        <div class="river-detail">
+          <div class="cardlet">
+            <div class="river-stat-label">Latest reading</div>
+            <div id="river-timestamp" class="river-stat-value" style="font-size:22px;"></div>
+            <div id="river-trend" class="stat-note"></div>
+          </div>
+          <div class="cardlet">
+            <div class="river-stat-label">Discharge</div>
+            <div id="river-discharge" class="river-stat-value" style="font-size:22px;"></div>
+            <div id="river-extra" class="stat-note"></div>
+          </div>
+        </div>
+        <div id="river-status" class="stat-note"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script src="hwQ.js"></script>
+<script src="capRaw.js"></script>
+<script>
+const hwQ = window.hwQ || [];
+const capRaw = window.capRaw || [];
+
+function interpolate1D(x, pairs) {
+  if (!pairs.length) return null;
+  if (x <= pairs[0][0]) return pairs[0][1];
+  if (x >= pairs[pairs.length - 1][0]) return pairs[pairs.length - 1][1];
+  for (let i = 0; i < pairs.length - 1; i += 1) {
+    const [x1, y1] = pairs[i];
+    const [x2, y2] = pairs[i + 1];
+    if (x >= x1 && x <= x2) {
+      const ratio = (x - x1) / (x2 - x1);
+      return y1 + ratio * (y2 - y1);
+    }
+  }
+  return null;
+}
+
+function buildCapTables() {
+  const byReading = new Map();
+  for (const row of capRaw) {
+    const [reading, cap, pct] = row;
+    if (!Number.isFinite(reading) || !Number.isFinite(cap) || !Number.isFinite(pct)) continue;
+    const prev = byReading.get(reading);
+    if (!prev) {
+      byReading.set(reading, { cap, pct });
+    } else {
+      byReading.set(reading, { cap: Math.max(prev.cap, cap), pct: Math.min(prev.pct, pct) });
+    }
+  }
+  const rows = Array.from(byReading.entries())
+    .map(([reading, value]) => [reading, value.cap, value.pct])
+    .sort((a, b) => a[0] - b[0]);
+  return {
+    capPairs: rows.map((row) => [row[0], row[1]]),
+    pctPairs: rows.map((row) => [row[0], row[2]]),
+  };
+}
+
+const { capPairs, pctPairs } = buildCapTables();
+
+function dischargeFromLevel(level) {
+  if (!hwQ.length || level < hwQ[0][0]) return 0;
+  return interpolate1D(level, hwQ);
+}
+
+function capacityFromReading(level) {
+  return interpolate1D(level, capPairs);
+}
+
+function storagePctFromReading(level) {
+  return interpolate1D(level, pctPairs);
+}
+
+function formatTimestamp(ts) {
+  const date = new Date(ts);
+  if (Number.isNaN(date.getTime())) return String(ts || "");
+  return date.toLocaleString("en-AU", {
+    timeZone: "Australia/Brisbane",
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZoneName: "short"
+  });
+}
+
+function formatDayLabel(dateText) {
+  const date = new Date(dateText);
+  if (Number.isNaN(date.getTime())) return dateText;
+  return date.toLocaleDateString("en-AU", {
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+    timeZone: "Australia/Brisbane"
+  });
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function setPageUpdated(parts) {
+  const el = document.getElementById("page-updated");
+  const stamp = parts.filter(Boolean).join(" | ");
+  el.textContent = stamp || "No source timestamps";
+}
+
+async function loadForecast() {
+  const container = document.getElementById("forecast-grid");
+  const status = document.getElementById("forecast-status");
+  try {
+    const response = await fetch("data/dashboard_forecast.json", { cache: "no-store" });
+    if (!response.ok) throw new Error(`Forecast HTTP ${response.status}`);
+    const data = await response.json();
+    const days = Array.isArray(data.days) ? data.days.slice(0, 2) : [];
+    if (!days.length) throw new Error("No forecast days available.");
+
+    container.innerHTML = days.map((day) => `
+      <article class="forecast-card">
+        <h3>${escapeHtml(day.label)}</h3>
+        <div class="forecast-meta">${escapeHtml(day.date)}</div>
+        <div class="forecast-temp">${escapeHtml(day.min)}° / ${escapeHtml(day.max)}°</div>
+        <div class="forecast-meta">${escapeHtml(day.rainfall)} | ${escapeHtml(day.rainChance)}</div>
+        <div class="forecast-summary">${escapeHtml(day.summary)}</div>
+      </article>
+    `).join("");
+
+    status.textContent = data.issued_at ? `Forecast issued ${data.issued_at}` : "";
+    return data.generated_at || data.issued_at || "";
+  } catch (error) {
+    container.innerHTML = `<div class="error">${escapeHtml(String(error.message || error))}</div>`;
+    status.textContent = "Forecast data unavailable.";
+    return "";
+  }
+}
+
+function eventTimeLabel(event) {
+  if (!event) return "";
+  if (event.all_day) return "All day";
+  const start = event.start_local_time || "";
+  const end = event.end_local_time || "";
+  if (start && end) return `${start} - ${end}`;
+  return start || end || "Time TBC";
+}
+
+async function loadCalendar() {
+  const container = document.getElementById("calendar-columns");
+  const status = document.getElementById("calendar-status");
+  try {
+    const response = await fetch("data/calendar_summary.json", { cache: "no-store" });
+    if (!response.ok) throw new Error(`Calendar HTTP ${response.status}`);
+    const data = await response.json();
+    const days = Array.isArray(data.days) ? data.days.slice(0, 2) : [];
+    if (!days.length) throw new Error("No calendar days available.");
+
+    container.innerHTML = days.map((day) => {
+      const items = Array.isArray(day.events) ? day.events : [];
+      const inner = items.length ? `
+        <div class="calendar-list">
+          ${items.map((event) => `
+            <article class="calendar-item">
+              <div class="calendar-item-source">${escapeHtml(event.source)}</div>
+              <div class="calendar-item-title">${escapeHtml(event.summary)}</div>
+              <div class="calendar-item-meta">${escapeHtml(eventTimeLabel(event))}</div>
+              ${event.location ? `<div class="calendar-item-meta">${escapeHtml(event.location)}</div>` : ""}
+            </article>
+          `).join("")}
+        </div>
+      ` : `<div class="empty">No events.</div>`;
+
+      return `
+        <section class="calendar-day">
+          <h3>${escapeHtml(day.label)}</h3>
+          ${inner}
+        </section>
+      `;
+    }).join("");
+
+    if (Array.isArray(data.sources) && data.sources.length) {
+      const sourceNames = data.sources.map((source) => source.name).join(", ");
+      status.textContent = `Sources: ${sourceNames}`;
+    } else {
+      status.textContent = "No calendar feeds configured.";
+    }
+    return data.generated_at || "";
+  } catch (error) {
+    container.innerHTML = `<div class="error">${escapeHtml(String(error.message || error))}</div>`;
+    status.textContent = "Calendar data unavailable. Configure the workflow feed URLs to populate this section.";
+    return "";
+  }
+}
+
+async function loadRiver() {
+  const grid = document.getElementById("river-grid");
+  const status = document.getElementById("river-status");
+  const timestampEl = document.getElementById("river-timestamp");
+  const trendEl = document.getElementById("river-trend");
+  const dischargeEl = document.getElementById("river-discharge");
+  const extraEl = document.getElementById("river-extra");
+
+  try {
+    const response = await fetch("data/ross_data.json", { cache: "no-store" });
+    if (!response.ok) throw new Error(`Ross data HTTP ${response.status}`);
+    const api = await response.json();
+    const site = Array.isArray(api.sites) ? api.sites[0] : null;
+    const damBlock = site && Array.isArray(site.data) ? site.data.find((item) => item && item.type === "dam") : null;
+    const readings = damBlock && Array.isArray(damBlock.data) ? damBlock.data : [];
+    if (!readings.length) throw new Error("Dam readings are missing.");
+
+    const latest = readings[0];
+    const level = Number(latest.value);
+    if (!Number.isFinite(level)) throw new Error("Latest dam level is not numeric.");
+
+    const capML = capacityFromReading(level);
+    const storPct = storagePctFromReading(level);
+    const discharge = dischargeFromLevel(level);
+    const dischargeLs = discharge * 1000;
+    const binsPerSecond = dischargeLs / 120;
+    const trend = site && site.state ? String(site.state.trend || site.state.siteState || "") : "";
+
+    const stats = [
+      ["Level", `${level.toFixed(2)} m`],
+      ["Storage", storPct == null ? "N/A" : `${storPct.toFixed(1)}%`],
+      ["Capacity", capML == null ? "N/A" : `${Math.round(capML).toLocaleString("en-AU")} ML`],
+      ["Wheelie bins/s", `${binsPerSecond.toFixed(1)}`],
+    ];
+
+    grid.innerHTML = stats.map(([label, value]) => `
+      <div class="river-stat">
+        <div class="river-stat-label">${escapeHtml(label)}</div>
+        <div class="river-stat-value">${escapeHtml(value)}</div>
+      </div>
+    `).join("");
+
+    timestampEl.textContent = formatTimestamp(latest.timestamp);
+    trendEl.textContent = trend ? `Trend: ${trend}` : "Trend unavailable";
+    dischargeEl.textContent = `${Math.round(discharge).toLocaleString("en-AU")} m3/s`;
+    extraEl.textContent = `${Math.round(dischargeLs).toLocaleString("en-AU")} L/s`;
+    status.textContent = "Source: Townsville.Today Ross River API snapshot.";
+    return latest.timestamp || "";
+  } catch (error) {
+    grid.innerHTML = `<div class="error">${escapeHtml(String(error.message || error))}</div>`;
+    timestampEl.textContent = "";
+    trendEl.textContent = "";
+    dischargeEl.textContent = "";
+    extraEl.textContent = "";
+    status.textContent = "Ross River data unavailable.";
+    return "";
+  }
+}
+
+async function init() {
+  const [forecastStamp, calendarStamp, riverStamp] = await Promise.all([
+    loadForecast(),
+    loadCalendar(),
+    loadRiver(),
+  ]);
+  setPageUpdated([
+    forecastStamp && `Forecast ${formatTimestamp(forecastStamp)}`,
+    calendarStamp && `Calendar ${formatTimestamp(calendarStamp)}`,
+    riverStamp && `River ${formatTimestamp(riverStamp)}`,
+  ]);
+}
+
+init();
+</script>
+</body>
+</html>
