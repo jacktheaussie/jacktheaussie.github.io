@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-10T12:50:44.730149+00:00",
+  "generated_at": "2026-05-10T14:15:05.318511+00:00",
   "sources": [
     {
       "name": "Personal",
@@ -11,21 +11,6 @@
     }
   ],
   "days": [
-    {
-      "date": "2026-05-10",
-      "label": "Sunday 10 May",
-      "events": [
-        {
-          "source": "Personal",
-          "summary": "Milk crate",
-          "location": "",
-          "date": "2026-05-10",
-          "all_day": false,
-          "start_local_time": "09:00",
-          "end_local_time": "10:00"
-        }
-      ]
-    },
     {
       "date": "2026-05-11",
       "label": "Monday 11 May",
@@ -49,6 +34,11 @@
           "end_local_time": "12:00"
         }
       ]
+    },
+    {
+      "date": "2026-05-12",
+      "label": "Tuesday 12 May",
+      "events": []
     }
   ]
 }
