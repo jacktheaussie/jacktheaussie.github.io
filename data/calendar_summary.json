@@ -1,16 +1,54 @@
 {
-  "generated_at": "2026-05-10T13:35:00+00:00",
-  "sources": [],
+  "generated_at": "2026-05-10T01:38:11.546523+00:00",
+  "sources": [
+    {
+      "name": "Calendar 1",
+      "url_configured": true
+    },
+    {
+      "name": "Calendar 2",
+      "url_configured": true
+    }
+  ],
   "days": [
     {
       "date": "2026-05-10",
       "label": "Sunday 10 May",
-      "events": []
+      "events": [
+        {
+          "source": "Calendar 1",
+          "summary": "Milk crate",
+          "location": "",
+          "date": "2026-05-10",
+          "all_day": false,
+          "start_local_time": "09:00",
+          "end_local_time": "10:00"
+        }
+      ]
     },
     {
       "date": "2026-05-11",
       "label": "Monday 11 May",
-      "events": []
+      "events": [
+        {
+          "source": "Calendar 2",
+          "summary": "T26216 QCBS TBC",
+          "location": "",
+          "date": "2026-05-11",
+          "all_day": false,
+          "start_local_time": "09:00",
+          "end_local_time": "10:00"
+        },
+        {
+          "source": "Calendar 1",
+          "summary": "Call deano painter",
+          "location": "",
+          "date": "2026-05-11",
+          "all_day": false,
+          "start_local_time": "11:00",
+          "end_local_time": "12:00"
+        }
+      ]
     }
   ]
 }
