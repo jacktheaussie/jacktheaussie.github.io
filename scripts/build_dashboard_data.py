@@ -4,6 +4,7 @@ import datetime as dt
 import json
 import os
 import re
+import subprocess
 import urllib.request
 from html import unescape
 from pathlib import Path
@@ -20,6 +21,7 @@ UTC = dt.timezone.utc
 FORECAST_URL = "https://www.bom.gov.au/places/qld/townsville-city/forecast"
 FORECAST_OUT = DATA_DIR / "dashboard_forecast.json"
 CALENDAR_OUT = DATA_DIR / "calendar_summary.json"
+FORECAST_HTML_PATH = os.getenv("FORECAST_HTML_PATH", "").strip()
 
 
 def fetch_text(url: str) -> str:
@@ -29,6 +31,30 @@ def fetch_text(url: str) -> str:
     )
     with urllib.request.urlopen(request, timeout=30) as response:
         return response.read().decode("utf-8", errors="replace")
+
+
+def load_forecast_source() -> str:
+    if FORECAST_HTML_PATH:
+        path = Path(FORECAST_HTML_PATH)
+        if path.exists():
+            return path.read_text(encoding="utf-8", errors="replace")
+
+    try:
+        return fetch_text(FORECAST_URL)
+    except Exception:
+        curl_result = subprocess.run(
+            [
+                "curl",
+                "-fsSL",
+                "-A",
+                "Mozilla/5.0 (compatible; dashboard-bot/1.0)",
+                FORECAST_URL,
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return curl_result.stdout
 
 
 def clean_text(value: str) -> str:
@@ -239,8 +265,19 @@ def build_calendar_summary() -> dict:
     }
 
 
+def build_forecast_summary() -> dict:
+    try:
+        return parse_forecast_html(load_forecast_source())
+    except Exception:
+        if FORECAST_OUT.exists():
+            existing = json.loads(FORECAST_OUT.read_text(encoding="utf-8"))
+            existing["fallback_used_at"] = dt.datetime.now(UTC).isoformat()
+            return existing
+        raise
+
+
 def main() -> None:
-    forecast = parse_forecast_html(fetch_text(FORECAST_URL))
+    forecast = build_forecast_summary()
     FORECAST_OUT.write_text(json.dumps(forecast, indent=2), encoding="utf-8")
 
     calendar = build_calendar_summary()

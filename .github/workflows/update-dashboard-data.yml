@@ -19,8 +19,17 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Download BOM forecast page
+        run: |
+          mkdir -p tmp
+          curl -fsSL \
+            -A "Mozilla/5.0 (compatible; dashboard-bot/1.0)" \
+            "https://www.bom.gov.au/places/qld/townsville-city/forecast" \
+            -o tmp/townsville-forecast.html || true
+
       - name: Build dashboard data
         env:
+          FORECAST_HTML_PATH: tmp/townsville-forecast.html
           ICAL_URL_1: ${{ secrets.ICAL_URL_1 }}
           ICAL_URL_2: ${{ secrets.ICAL_URL_2 }}
         run: python scripts/build_dashboard_data.py
