@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-05-10T01:38:11.546523+00:00",
+  "generated_at": "2026-05-10T01:42:39.791159+00:00",
   "sources": [
     {
-      "name": "Calendar 1",
+      "name": "Personal",
       "url_configured": true
     },
     {
-      "name": "Calendar 2",
+      "name": "Work",
       "url_configured": true
     }
   ],
@@ -16,7 +16,7 @@
       "label": "Sunday 10 May",
       "events": [
         {
-          "source": "Calendar 1",
+          "source": "Personal",
           "summary": "Milk crate",
           "location": "",
           "date": "2026-05-10",
@@ -31,7 +31,7 @@
       "label": "Monday 11 May",
       "events": [
         {
-          "source": "Calendar 2",
+          "source": "Work",
           "summary": "T26216 QCBS TBC",
           "location": "",
           "date": "2026-05-11",
@@ -40,7 +40,7 @@
           "end_local_time": "10:00"
         },
         {
-          "source": "Calendar 1",
+          "source": "Personal",
           "summary": "Call deano painter",
           "location": "",
           "date": "2026-05-11",
