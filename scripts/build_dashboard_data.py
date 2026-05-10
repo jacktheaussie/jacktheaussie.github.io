@@ -230,8 +230,8 @@ def build_calendar_summary() -> dict:
     tomorrow = today + dt.timedelta(days=1)
 
     source_defs = [
-        ("Calendar 1", os.getenv("ICAL_URL_1", "").strip()),
-        ("Calendar 2", os.getenv("ICAL_URL_2", "").strip()),
+        ("Personal", os.getenv("ICAL_URL_1", "").strip()),
+        ("Work", os.getenv("ICAL_URL_2", "").strip()),
     ]
 
     all_events: list[dict] = []
