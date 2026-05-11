@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-11T22:44:30.663142+00:00",
+  "generated_at": "2026-05-11T23:45:08.261832+00:00",
   "sources": [
     {
       "name": "Personal",
@@ -14,7 +14,17 @@
     {
       "date": "2026-05-12",
       "label": "Tuesday 12 May",
-      "events": []
+      "events": [
+        {
+          "source": "Work",
+          "summary": "T25386",
+          "location": "",
+          "date": "2026-05-12",
+          "all_day": false,
+          "start_local_time": "10:00",
+          "end_local_time": "11:00"
+        }
+      ]
     },
     {
       "date": "2026-05-13",
