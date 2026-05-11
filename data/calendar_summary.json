@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-11T11:56:30.916733+00:00",
+  "generated_at": "2026-05-11T14:31:51.298695+00:00",
   "sources": [
     {
       "name": "Personal",
@@ -12,42 +12,24 @@
   ],
   "days": [
     {
-      "date": "2026-05-11",
-      "label": "Monday 11 May",
-      "events": [
-        {
-          "source": "Work",
-          "summary": "T26216 QCBS TBC",
-          "location": "",
-          "date": "2026-05-11",
-          "all_day": false,
-          "start_local_time": "09:00",
-          "end_local_time": "10:00"
-        },
-        {
-          "source": "Personal",
-          "summary": "Call deano painter",
-          "location": "",
-          "date": "2026-05-11",
-          "all_day": false,
-          "start_local_time": "11:00",
-          "end_local_time": "12:00"
-        },
-        {
-          "source": "Personal",
-          "summary": "Panadol work",
-          "location": "",
-          "date": "2026-05-11",
-          "all_day": false,
-          "start_local_time": "18:00",
-          "end_local_time": "19:00"
-        }
-      ]
-    },
-    {
       "date": "2026-05-12",
       "label": "Tuesday 12 May",
       "events": []
+    },
+    {
+      "date": "2026-05-13",
+      "label": "Wednesday 13 May",
+      "events": [
+        {
+          "source": "Work",
+          "summary": "FW: KIRWAN BIM",
+          "location": "Microsoft Teams Meeting",
+          "date": "2026-05-13",
+          "all_day": false,
+          "start_local_time": "10:00",
+          "end_local_time": "11:00"
+        }
+      ]
     }
   ]
 }
