@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-12T13:48:30.864373+00:00",
+  "generated_at": "2026-05-12T16:12:38.405346+00:00",
   "sources": [
     {
       "name": "Personal",
@@ -12,21 +12,6 @@
   ],
   "days": [
     {
-      "date": "2026-05-12",
-      "label": "Tuesday 12 May",
-      "events": [
-        {
-          "source": "Work",
-          "summary": "T25386 ASAP MSC Loading Bay Zone B",
-          "location": "",
-          "date": "2026-05-12",
-          "all_day": false,
-          "start_local_time": "10:00",
-          "end_local_time": "11:00"
-        }
-      ]
-    },
-    {
       "date": "2026-05-13",
       "label": "Wednesday 13 May",
       "events": [
@@ -38,6 +23,21 @@
           "all_day": false,
           "start_local_time": "10:00",
           "end_local_time": "11:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-05-14",
+      "label": "Thursday 14 May",
+      "events": [
+        {
+          "source": "Work",
+          "summary": "Staff Meeting",
+          "location": "Microsoft Teams Meeting",
+          "date": "2026-05-14",
+          "all_day": false,
+          "start_local_time": "10:00",
+          "end_local_time": "10:30"
         }
       ]
     }
