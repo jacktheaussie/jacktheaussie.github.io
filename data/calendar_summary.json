@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-11T23:45:08.261832+00:00",
+  "generated_at": "2026-05-12T01:51:22.679852+00:00",
   "sources": [
     {
       "name": "Personal",
@@ -17,7 +17,7 @@
       "events": [
         {
           "source": "Work",
-          "summary": "T25386",
+          "summary": "T25386 ASAP MSC Loading Bay Zone B",
           "location": "",
           "date": "2026-05-12",
           "all_day": false,
