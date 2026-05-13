@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-13T11:23:53.932872+00:00",
+  "generated_at": "2026-05-13T14:01:58.365114+00:00",
   "sources": [
     {
       "name": "Personal",
@@ -12,21 +12,6 @@
   ],
   "days": [
     {
-      "date": "2026-05-13",
-      "label": "Wednesday 13 May",
-      "events": [
-        {
-          "source": "Work",
-          "summary": "FW: KIRWAN BIM",
-          "location": "Microsoft Teams Meeting",
-          "date": "2026-05-13",
-          "all_day": false,
-          "start_local_time": "10:00",
-          "end_local_time": "11:00"
-        }
-      ]
-    },
-    {
       "date": "2026-05-14",
       "label": "Thursday 14 May",
       "events": [
@@ -38,6 +23,30 @@
           "all_day": false,
           "start_local_time": "10:00",
           "end_local_time": "10:30"
+        },
+        {
+          "source": "Personal",
+          "summary": "Parents ceiling",
+          "location": "",
+          "date": "2026-05-14",
+          "all_day": false,
+          "start_local_time": "15:00",
+          "end_local_time": "16:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-05-15",
+      "label": "Friday 15 May",
+      "events": [
+        {
+          "source": "Work",
+          "summary": "T23283 PAY KHC Proof Roll",
+          "location": "",
+          "date": "2026-05-15",
+          "all_day": false,
+          "start_local_time": "13:00",
+          "end_local_time": "14:00"
         }
       ]
     }
