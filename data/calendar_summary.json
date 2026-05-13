@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-12T23:49:08.847175+00:00",
+  "generated_at": "2026-05-13T01:56:07.695673+00:00",
   "sources": [
     {
       "name": "Personal",
@@ -30,6 +30,15 @@
       "date": "2026-05-14",
       "label": "Thursday 14 May",
       "events": [
+        {
+          "source": "Work",
+          "summary": "FW: Garbutt Magpies Site Inspection (TBC)",
+          "location": "Garbutt Magpies Cricket & AFL Club (Hugh St\\, Townsville  Queensland  4814)",
+          "date": "2026-05-14",
+          "all_day": false,
+          "start_local_time": "10:00",
+          "end_local_time": "10:30"
+        },
         {
           "source": "Work",
           "summary": "Staff Meeting",
