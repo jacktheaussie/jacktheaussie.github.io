@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-14T13:25:53.195601+00:00",
+  "generated_at": "2026-05-14T16:03:44.757932+00:00",
   "sources": [
     {
       "name": "Personal",
@@ -11,30 +11,6 @@
     }
   ],
   "days": [
-    {
-      "date": "2026-05-14",
-      "label": "Thursday 14 May",
-      "events": [
-        {
-          "source": "Work",
-          "summary": "FW: Garbutt Magpies Site Inspection (TBC)",
-          "location": "Garbutt Magpies Cricket & AFL Club (Hugh St\\, Townsville  Queensland  4814)",
-          "date": "2026-05-14",
-          "all_day": false,
-          "start_local_time": "10:00",
-          "end_local_time": "10:30"
-        },
-        {
-          "source": "Work",
-          "summary": "Kieron in GT",
-          "location": "",
-          "date": "2026-05-14",
-          "all_day": false,
-          "start_local_time": "14:30",
-          "end_local_time": "15:00"
-        }
-      ]
-    },
     {
       "date": "2026-05-15",
       "label": "Friday 15 May",
@@ -49,6 +25,11 @@
           "end_local_time": "14:00"
         }
       ]
+    },
+    {
+      "date": "2026-05-16",
+      "label": "Saturday 16 May",
+      "events": []
     }
   ]
 }
