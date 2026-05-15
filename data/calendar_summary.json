@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-15T13:25:02.258883+00:00",
+  "generated_at": "2026-05-15T15:54:44.843283+00:00",
   "sources": [
     {
       "name": "Personal",
@@ -12,23 +12,13 @@
   ],
   "days": [
     {
-      "date": "2026-05-15",
-      "label": "Friday 15 May",
-      "events": [
-        {
-          "source": "Work",
-          "summary": "T23283 PAY KHC Proof Roll",
-          "location": "",
-          "date": "2026-05-15",
-          "all_day": false,
-          "start_local_time": "13:30",
-          "end_local_time": "14:30"
-        }
-      ]
-    },
-    {
       "date": "2026-05-16",
       "label": "Saturday 16 May",
+      "events": []
+    },
+    {
+      "date": "2026-05-17",
+      "label": "Sunday 17 May",
       "events": []
     }
   ]
