@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-15T22:46:28.521616+00:00",
+  "generated_at": "2026-05-15T23:43:26.871600+00:00",
   "sources": [
     {
       "name": "Personal",
@@ -14,7 +14,17 @@
     {
       "date": "2026-05-16",
       "label": "Saturday 16 May",
-      "events": []
+      "events": [
+        {
+          "source": "Personal",
+          "summary": "Check for carrot",
+          "location": "",
+          "date": "2026-05-16",
+          "all_day": false,
+          "start_local_time": "10:30",
+          "end_local_time": "11:30"
+        }
+      ]
     },
     {
       "date": "2026-05-17",
