@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-17T21:43:15.844274+00:00",
+  "generated_at": "2026-05-17T22:42:01.436392+00:00",
   "sources": [
     {
       "name": "Personal",
@@ -26,12 +26,12 @@
         },
         {
           "source": "Work",
-          "summary": "Call Christian GPB Lavarack",
+          "summary": "Lavarack",
           "location": "",
           "date": "2026-05-18",
           "all_day": false,
-          "start_local_time": "09:00",
-          "end_local_time": "09:30"
+          "start_local_time": "09:30",
+          "end_local_time": "10:30"
         }
       ]
     },
