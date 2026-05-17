@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-17T12:52:02.540881+00:00",
+  "generated_at": "2026-05-17T14:20:00.570976+00:00",
   "sources": [
     {
       "name": "Personal",
@@ -11,11 +11,6 @@
     }
   ],
   "days": [
-    {
-      "date": "2026-05-17",
-      "label": "Sunday 17 May",
-      "events": []
-    },
     {
       "date": "2026-05-18",
       "label": "Monday 18 May",
@@ -37,6 +32,39 @@
           "all_day": false,
           "start_local_time": "09:00",
           "end_local_time": "09:30"
+        }
+      ]
+    },
+    {
+      "date": "2026-05-19",
+      "label": "Tuesday 19 May",
+      "events": [
+        {
+          "source": "Work",
+          "summary": "Jmac Maggie?",
+          "location": "",
+          "date": "2026-05-19",
+          "all_day": false,
+          "start_local_time": "10:30",
+          "end_local_time": "11:00"
+        },
+        {
+          "source": "Work",
+          "summary": "Tech Talk Tuesday - AS 1657 Overview",
+          "location": "https://us02web.zoom.us/w/81226085498?tk=Z-N4C5dX1l4t2t1O1pq1rH20CJ6qj7Qk9lpGzjcNMtg.DQkAAAAS6XO0ehZ0RG0weXZFSVRENmd2QXlwQ0FCY013AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&pwd=upP3EwU2HstvX6KphRqOLB9rmwnha3.1&uuid=WN_1fSSkXlBR-esSSvtLm3QcA",
+          "date": "2026-05-19",
+          "all_day": false,
+          "start_local_time": "13:00",
+          "end_local_time": "13:30"
+        },
+        {
+          "source": "Work",
+          "summary": "T26003 ASI webinar",
+          "location": "",
+          "date": "2026-05-19",
+          "all_day": false,
+          "start_local_time": "14:00",
+          "end_local_time": "15:00"
         }
       ]
     }
